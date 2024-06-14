@@ -4,6 +4,16 @@
 
 #include <iostream>
 
+bool hit_circle(const point3& center, double radius, const ray& r) {
+	vec3 origin_center = center - r.origin();
+	//quadratic formula
+	auto a = dot(r.direction(), r.direction());
+	auto b = -2.0 * dot(r.direction(), origin_center);
+	auto c = dot(origin_center, origin_center) - (radius * radius);
+	auto discriminant = (b * b) - (4 * a * c);
+	return discriminant >= 0;
+}
+
 color sky_color(const ray& r) {
 	vec3 unit_direction = unit_vector(r.direction());
 	//linear blend
@@ -11,10 +21,18 @@ color sky_color(const ray& r) {
 	return ((1.0 - a) * color(1.0, 1.0, 1.0)) + (a * color(0.5, 0.7, 1.0));
 }
 
+color ray_color(const ray& r) {
+	if (hit_circle(point3(0, 0, -1), 0.5, r)) {
+		return color(0, 0, 1);
+	}
+
+	return sky_color(r);
+}
+
 int main() {
 	//image
 	auto aspect_ratio = 16.0 / 9.0;
-	int image_width = 400;
+	int image_width = 800;
 	int image_height = int(image_width / aspect_ratio);
 	image_height = (image_height < 1) ? 1 : image_height;
 
@@ -41,7 +59,7 @@ int main() {
 			auto direction = pixel_center - camera_center;
 			ray r(camera_center, direction);
 
-			auto pixel_color = sky_color(r);
+			auto pixel_color = ray_color(r);
 			write_color(std::cout, pixel_color);
 		}
 	}

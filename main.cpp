@@ -4,14 +4,21 @@
 
 #include <iostream>
 
-bool hit_circle(const point3& center, double radius, const ray& r) {
+double hit_circle(const point3& center, double radius, const ray& r) {
 	vec3 origin_center = center - r.origin();
 	//quadratic formula
 	auto a = dot(r.direction(), r.direction());
 	auto b = -2.0 * dot(r.direction(), origin_center);
 	auto c = dot(origin_center, origin_center) - (radius * radius);
 	auto discriminant = (b * b) - (4 * a * c);
-	return discriminant >= 0;
+	
+	if (discriminant < 0.0) {
+		return -1.0;
+	}
+	else {
+		return (- b - sqrt(discriminant)) / (2.0 * a);
+	}
+
 }
 
 color sky_color(const ray& r) {
@@ -22,8 +29,10 @@ color sky_color(const ray& r) {
 }
 
 color ray_color(const ray& r) {
-	if (hit_circle(point3(0, 0, -1), 0.5, r)) {
-		return color(0, 0, 1);
+	auto t = hit_circle(point3(0, 0, -1), 0.5, r);
+	if (t > 0.0) {
+		vec3 surface_normal = unit_vector(r.at(t) - vec3(0, 0, -1));
+		return 0.5 * color(surface_normal + vec3(1, 1, 1));
 	}
 
 	return sky_color(r);

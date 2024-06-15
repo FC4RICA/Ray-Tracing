@@ -1,25 +1,10 @@
 #include "color.h"
 #include "vec3.h"
 #include "ray.h"
+#include "hittable.h"
+#include "sphere.h"
 
 #include <iostream>
-
-double hit_circle(const point3& center, double radius, const ray& r) {
-	vec3 origin_center = center - r.origin();
-	//quadratic formula
-	auto a = r.direction().length_squeared();
-	auto h = dot(r.direction(), origin_center);
-	auto c = origin_center.length_squeared() - (radius * radius);
-	auto discriminant = (h * h) - (a * c);
-	
-	if (discriminant < 0.0) {
-		return -1.0;
-	}
-	else {
-		return (h - sqrt(discriminant)) / a;
-	}
-
-}
 
 color sky_color(const ray& r) {
 	vec3 unit_direction = unit_vector(r.direction());
@@ -29,10 +14,10 @@ color sky_color(const ray& r) {
 }
 
 color ray_color(const ray& r) {
-	auto t = hit_circle(point3(0, 0, -1), 0.5, r);
-	if (t > 0.0) {
-		vec3 surface_normal = unit_vector(r.at(t) - vec3(0, 0, -1));
-		return 0.5 * color(surface_normal + vec3(1, 1, 1));
+	sphere sphere(point3(0, 0, -1), 0.5);
+	hit_record rec;
+	if (sphere.hit(r, 0, 1000, rec)) {
+		return 0.5 * color(rec.normal + vec3(1, 1, 1));
 	}
 
 	return sky_color(r);

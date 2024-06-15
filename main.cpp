@@ -7,16 +7,16 @@
 double hit_circle(const point3& center, double radius, const ray& r) {
 	vec3 origin_center = center - r.origin();
 	//quadratic formula
-	auto a = dot(r.direction(), r.direction());
-	auto b = -2.0 * dot(r.direction(), origin_center);
-	auto c = dot(origin_center, origin_center) - (radius * radius);
-	auto discriminant = (b * b) - (4 * a * c);
+	auto a = r.direction().length_squeared();
+	auto h = dot(r.direction(), origin_center);
+	auto c = origin_center.length_squeared() - (radius * radius);
+	auto discriminant = (h * h) - (a * c);
 	
 	if (discriminant < 0.0) {
 		return -1.0;
 	}
 	else {
-		return (- b - sqrt(discriminant)) / (2.0 * a);
+		return (h - sqrt(discriminant)) / a;
 	}
 
 }

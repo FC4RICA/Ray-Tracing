@@ -1,10 +1,8 @@
-#include "color.h"
-#include "vec3.h"
-#include "ray.h"
-#include "hittable.h"
-#include "sphere.h"
+#include "pch.h"
 
-#include <iostream>
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
 color sky_color(const ray& r) {
 	vec3 unit_direction = unit_vector(r.direction());
@@ -13,10 +11,9 @@ color sky_color(const ray& r) {
 	return ((1.0 - a) * color(1.0, 1.0, 1.0)) + (a * color(0.5, 0.7, 1.0));
 }
 
-color ray_color(const ray& r) {
-	sphere sphere(point3(0, 0, -1), 0.5);
+color ray_color(const ray& r, const hittable& world) {
 	hit_record rec;
-	if (sphere.hit(r, 0, 1000, rec)) {
+	if (world.hit(r, 0, INFINITY, rec)) {
 		return 0.5 * color(rec.normal + vec3(1, 1, 1));
 	}
 
@@ -29,6 +26,11 @@ int main() {
 	int image_width = 800;
 	int image_height = int(image_width / aspect_ratio);
 	image_height = (image_height < 1) ? 1 : image_height;
+
+	//world
+	hittable_list world;
+	world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
+	world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
 
 	//camera
 	auto focal_length = 1.0;
@@ -53,7 +55,7 @@ int main() {
 			auto direction = pixel_center - camera_center;
 			ray r(camera_center, direction);
 
-			auto pixel_color = ray_color(r);
+			auto pixel_color = ray_color(r, world);
 			write_color(std::cout, pixel_color);
 		}
 	}

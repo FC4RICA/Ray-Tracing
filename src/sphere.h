@@ -7,7 +7,7 @@ class sphere : public hittable {
 public:
 	sphere(const point3& center, double radius) : center(center), radius(fmax(0, radius)) {}
 
-	bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const override {
+	bool hit(const ray& r, interval t, hit_record& rec) const override {
 		vec3 origin_center = center - r.origin();
 		//quadratic formula
 		auto a = r.direction().length_squeared();
@@ -21,9 +21,9 @@ public:
 		auto sqrt_discriminant = sqrt(discriminant);
 		auto root = (h - sqrt_discriminant) / a;
 		//if root is in range
-		if (root <= tmin || root >= tmax) {
+		if (!t.surrounds(root)) {
 			root = (h + sqrt_discriminant) / a;
-			if (root <= tmin || root >= tmax) {
+			if (!t.surrounds(root)) {
 				return false;
 			}
 		}

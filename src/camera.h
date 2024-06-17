@@ -7,6 +7,7 @@ class camera {
 public:
 	double aspect_ratio = 1.0;
 	int image_width = 100;
+	int sample_per_pixel = 10;
 
 	void render(const hittable& world) {
 		init();
@@ -16,12 +17,13 @@ public:
 		for (int i = 0; i < image_height; i++) {
 			std::clog << "\rScanlines remaining: " << (image_height - i) << ' ' << std::flush;
 			for (int j = 0; j < image_width; j++) {
-				auto pixel_center = pixel0_loc + (j * pixel_delta_u) + (i * pixel_delta_v);
-				auto direction = pixel_center - camera_center;
-				ray r(camera_center, direction);
+				color pixel_color(0, 0, 0);
+				for (int sample = 0; sample < sample_per_pixel; sample++) {
+					ray r = get_ray(j, i);
+					pixel_color += ray_color(r, world);
+				}
 
-				auto pixel_color = ray_color(r, world);
-				write_color(std::cout, pixel_color);
+				write_color(std::cout, pixel_sample_scale * pixel_color);
 			}
 		}
 
@@ -30,6 +32,7 @@ public:
 
 private:
 	int image_height;
+	double pixel_sample_scale;
 	point3 camera_center;
 	point3 pixel0_loc;
 	vec3 pixel_delta_u;
@@ -39,6 +42,8 @@ private:
 	void init() {
 		image_height = int(image_width / aspect_ratio);
 		image_height = (image_height < 1) ? 1 : image_height;
+
+		pixel_sample_scale = 1.0 / sample_per_pixel;
 
 		auto focal_length = 1.0;
 		auto viewport_height = 2.0;
@@ -54,7 +59,19 @@ private:
 		pixel0_loc = viewport_top_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 	}
 
-	color ray_color(const ray& r, const hittable& world) {
+	ray get_ray(int x, int y) const {
+		auto offset = sample_square();
+		auto pixel_sample = pixel0_loc + ((x + offset.x()) * pixel_delta_u) + ((y + offset.y()) * pixel_delta_v);
+		auto ray_origin = camera_center;
+		auto ray_direction = pixel_sample - ray_origin;
+		return ray(ray_origin, ray_direction);
+	}
+
+	vec3 sample_square() const {
+		return vec3(random_double() - 0.5, random_double() - 0.5, 0);
+	}
+
+	color ray_color(const ray& r, const hittable& world) const {
 		hit_record rec;
 
 		if (world.hit(r, interval(0, Infinity), rec)) {
@@ -64,7 +81,7 @@ private:
 		return sky_color(r);
 	}
 
-	color sky_color(const ray& r) {
+	color sky_color(const ray& r) const {
 		vec3 unit_direction = unit_vector(r.direction());
 		//linear blend
 		auto a = 0.5 * (unit_direction.y() + 1.0);

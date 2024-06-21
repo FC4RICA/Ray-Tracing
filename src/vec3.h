@@ -56,6 +56,14 @@ public:
 	double length() const {
 		return sqrt(length_squeared());
 	}
+
+	static vec3 random() {
+		return vec3(random_double(), random_double(), random_double());
+	}
+
+	static vec3 random(double min, double max) {
+		return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+	}
 };
 
 // using point3 as alias for clarity
@@ -101,4 +109,20 @@ inline vec3 unit_vector(const vec3& v) {
 	return v / v.length();
 }
 
+inline vec3 random_in_unit_sphere() {
+	while (true) {
+		auto point = vec3::random(-1, 1);
+		if (point.length_squeared() < 1) return point;
+	}
+}
+
+inline vec3 random_unit_vec() {
+	return unit_vector(random_in_unit_sphere());
+}
+
+inline vec3 random_on_hemisphere(const vec3& normal) {
+	vec3 on_unit_sphere = random_unit_vec();
+	if (dot(on_unit_sphere, normal) > 0.0) return on_unit_sphere;
+	else return -on_unit_sphere;
+}
 #endif // !RAY_H

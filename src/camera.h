@@ -73,13 +73,13 @@ private:
 	}
 
 	color ray_color(const ray& r, int depth, const hittable& world) const {
-		if (depth <= 0) {
+		if (depth <= 0)
 			return color(0, 0, 0);
-		}
+
 		hit_record rec;
 
 		if (world.hit(r, interval(0.001, Infinity), rec)) {
-			vec3 direction = random_on_hemisphere(rec.normal);
+			vec3 direction = rec.normal + random_unit_vec();
 			return 0.5 * ray_color(ray(rec.p, direction), depth - 1, world);
 		}
 

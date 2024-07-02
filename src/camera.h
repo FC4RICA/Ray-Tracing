@@ -82,7 +82,7 @@ private:
 		if (world.hit(r, interval(0.001, Infinity), rec)) {
 			ray scattered;
 			color attenuation;
-			if (rec.mat->scatter(r, rec, attenuation, scattered)) {
+			if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
 				return attenuation * ray_color(scattered, depth - 1, world);
 			}
 			

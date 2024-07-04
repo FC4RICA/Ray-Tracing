@@ -11,39 +11,6 @@ public:
 	double t;
 	bool front_face;
 
-	hit_record() : mat_ptr(nullptr) {}
-
-    // Copy constructor and assignment operator
-    hit_record(const hit_record& other)
-        : p(other.p), normal(other.normal), t(other.t), mat_ptr(other.mat_ptr) {}
-
-    hit_record& operator=(const hit_record& other) {
-        if (this != &other) {
-            p = other.p;
-            normal = other.normal;
-            t = other.t;
-            mat_ptr = other.mat_ptr;
-        }
-        return *this;
-    }
-
-    // Move constructor and assignment operator
-    hit_record(hit_record&& other) noexcept
-        : p(std::move(other.p)), normal(std::move(other.normal)), t(other.t), mat_ptr(other.mat_ptr) {
-        other.mat_ptr = nullptr;  // Ensure ownership transfer
-    }
-
-    hit_record& operator=(hit_record&& other) noexcept {
-        if (this != &other) {
-            p = std::move(other.p);
-            normal = std::move(other.normal);
-            t = other.t;
-            mat_ptr = other.mat_ptr;
-            other.mat_ptr = nullptr;  // Ensure ownership transfer
-        }
-        return *this;
-    }
-
 	void set_face_normal(const ray& r, const vec3& outward_normal) {
 		// outward_normal is assumed to have unit length
 		front_face = dot(r.direction(), outward_normal) < 0;

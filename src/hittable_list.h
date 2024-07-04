@@ -17,14 +17,6 @@ public:
 		add(std::move(object));
 	}
 
-	// Delete copy constructor and copy assignment operator
-	hittable_list(const hittable_list&) = delete;
-	hittable_list& operator=(const hittable_list&) = delete;
-
-	// Default move constructor and move assignment operator
-	hittable_list(hittable_list&&) = default;
-	hittable_list& operator=(hittable_list&&) = default;
-
 	void clear() {
 		objects.clear();
 	}
